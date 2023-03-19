@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  name    String
+  role    UserRole
+  address String
+  Order   Order[]
+}
+
+model Order {
+  id     Int         @id @default(autoincrement())
+  user   User        @relation(fields: [userId], references: [id])
+  userId Int
+  lot    Lot         @relation(fields: [lotId], references: [id])
+  lotId  Int
+  status OrderStatus
+}
+
+model Lot {
+  id           Int     @id @default(autoincrement())
+  price        Int
+  sellersStory String?
+  car          Car     @relation(fields: [carId], references: [id])
+  carId        Int
+  Order        Order[]
+}
+
+model Car {
+  id            Int         @id @default(autoincrement())
+  vin           String
+  name          String
+  manufactDate  DateTime
+  manufacturer  String
+  images        String[]
+  mileage       Int?
+  driveTrain    DriveTrain
+  features      Feature[]
+  equipments    Equipment[]
+  Lot           Lot[]
+  location      Location    @relation(fields: [locationId], references: [id])
+  locationId    Int
+  exterior      Exterior    @relation(fields: [exteriorId], references: [id])
+  exteriorId    Int         @unique
+  interior      Interior    @relation(fields: [interiorId], references: [id])
+  interiorId    Int         @unique
+  performance   Performance @relation(fields: [performanceId], references: [id])
+  performanceId Int         @unique
+}
+
+model Performance {
+  id               Int   @id @default(autoincrement())
+  range            Int
+  power            Int
+  batteryCapacity  Int
+  accelerationTime Int
+  Car              Car[]
+}
+
+model Interior {
+  id               Int    @id @default(autoincrement())
+  weight           Int?
+  seatings         Int?
+  frontCargoVolume Int?
+  rearCargoVolume  Int?
+  color            String
+  Car              Car[]
+}
+
+model Exterior {
+  id        Int       @id @default(autoincrement())
+  color     String
+  bodyStyle BodyStyle
+  Car       Car[]
+}
+
+model Equipment {
+  id    Int    @id @default(autoincrement())
+  title String
+  Car   Car?   @relation(fields: [carId], references: [id])
+  carId Int?
+}
+
+model Feature {
+  id    Int    @id @default(autoincrement())
+  title String
+  image String
+  car   Car[]
+}
+
+model Location {
+  id      Int    @id @default(autoincrement())
+  country String
+  city    String
+  Car     Car[]
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum DriveTrain {
+  rear
+  front
+  all
+}
+
+enum BodyStyle {
+  micro
+  sedan
+  coupe
+  sportscar
+  hatchback
+  convertible
+  suv
+  cuv
+  minivan
+  pickuptruck
+}
+
+enum OrderStatus {
+  awaiting_payment
+  processing
+  processed
+  shipped
+  awaiting_acception
+  finished
+}
